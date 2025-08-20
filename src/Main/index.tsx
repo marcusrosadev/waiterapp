@@ -5,7 +5,7 @@ import { Menu } from "@/components/Menu";
 import { Categories } from "@/components/Categories";
 import { Button } from "@/components/Button";
 import { TableModal } from "@/components/TableModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Cart } from "@/components/Cart";
 
 import { Container, CategoriesContainer, MenuContainer, Footer, FooterContainer, CenteredContainer } from "./styles";
@@ -14,8 +14,14 @@ import { CartItem } from "@/types/CartItem";
 import { Product } from "@/types/product";
 
 import { products as mockProducts } from "@/mocks/products";
+import { categories as mockCategories } from "@/mocks/categories";
+
+
 import { Empty } from "@/components/Icons/Empty";
 import { Text } from "@/components/Text";
+import { Category } from "@/types/categories";
+
+import axios from "axios";
 
 
 export function Main() {
@@ -28,6 +34,13 @@ export function Main() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
   const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [categories, setCategories] = useState<Category[]>(mockCategories);
+
+  useEffect(() => {
+    axios.get('http://192.168.18.22:3001/products').then((response) => {
+      console.log('promise resolva', response)
+    });
+  }, [])
 
   function handleSaveTable(table: string) {
     setSelectedTable(table);
@@ -108,7 +121,7 @@ export function Main() {
         {!isLoading && (
           <>
             <CategoriesContainer>
-              <Categories />
+              <Categories categories={categories} />
             </CategoriesContainer>
 
             {products.length > 0 ? (

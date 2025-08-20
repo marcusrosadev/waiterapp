@@ -9,7 +9,6 @@ export const ProductImage = styled.Image`
   width: 120px;
   height: 96px;
   border-radius: 8px;
-  border: 1px solid;
 `
 
 export const ProductDetails = styled.View`

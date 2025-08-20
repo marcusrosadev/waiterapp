@@ -19,9 +19,6 @@ export const Image = styled.Image`
   width: 48px;
   height: 40px;
   border-radius: 6px;
-
-  border: 1px solid;
-  background-color: yellow;
 `
 
 export const QuantityContainer = styled.View`

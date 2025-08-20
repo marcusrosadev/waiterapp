@@ -3,8 +3,6 @@ import styled from "styled-components/native";
 export const Image = styled.ImageBackground`
   width: 100%;
   height: 200px;
-  border: 2px solid;
-  background: red;
   align-items: flex-end;
 `
 export const CloseButton = styled.TouchableOpacity`
