@@ -13,34 +13,46 @@ import { Container, CategoriesContainer, MenuContainer, Footer, FooterContainer,
 import { CartItem } from "@/types/CartItem";
 import { Product } from "@/types/product";
 
-import { products as mockProducts } from "@/mocks/products";
-import { categories as mockCategories } from "@/mocks/categories";
-
-
 import { Empty } from "@/components/Icons/Empty";
 import { Text } from "@/components/Text";
 import { Category } from "@/types/categories";
-
-import axios from "axios";
-
+import { api } from "@/utils/api";
 
 export function Main() {
   const [isTableModalVisible, setIsTableModalVisible] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
   const [selectedTable, setSelectedTable] = useState('');
 
   const [cartItems, setCartItems] = useState<CartItem[]>([])
 
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [categories, setCategories] = useState<Category[]>(mockCategories);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    axios.get('http://192.168.18.22:3001/products').then((response) => {
-      console.log('promise resolva', response)
+    Promise.all([
+      api.get('/categories'),
+      api.get('/products')
+    ]).then(([ categoriesRes, productsRes ]) => {
+      setCategories(categoriesRes.data);
+      setProducts(productsRes.data);
+      setIsLoading(false);
     });
   }, [])
+
+  async function handleSelectCategory(categoryId: string) {
+    const route = !categoryId
+      ? '/products'
+      : `/categories/${categoryId}/products`;
+
+      setIsLoadingProducts(true);
+
+    const { data } = await api.get(route);
+    setProducts(data);
+      setIsLoadingProducts(false);
+  }
 
   function handleSaveTable(table: string) {
     setSelectedTable(table);
@@ -121,23 +133,36 @@ export function Main() {
         {!isLoading && (
           <>
             <CategoriesContainer>
-              <Categories categories={categories} />
+              <Categories
+                categories={categories}
+                onSelectCategory={handleSelectCategory}
+              />
             </CategoriesContainer>
 
-            {products.length > 0 ? (
-              <MenuContainer>
-                <Menu
-                  onAddToCart={handleAddToCard}
-                  products={products}
-                />
-              </MenuContainer>
-            ): (
+            {isLoadingProducts ? (
               <CenteredContainer>
-                <Empty />
-
-                <Text color="#666" style={{ marginTop: 24 }}>Nenhum produto foi encontrado!</Text>
+                <ActivityIndicator color="#D73035" size="large"/>
               </CenteredContainer>
+            ) : (
+              <>
+                {products.length > 0 ? (
+                  <MenuContainer>
+                    <Menu
+                      onAddToCart={handleAddToCard}
+                      products={products}
+                    />
+                  </MenuContainer>
+                ): (
+                  <CenteredContainer>
+                    <Empty />
+
+                    <Text color="#666" style={{ marginTop: 24 }}>Nenhum produto foi encontrado!</Text>
+                  </CenteredContainer>
+                )}
+              </>
             )}
+
+
           </>
         )}
 
@@ -159,6 +184,7 @@ export function Main() {
               onAdd={handleAddToCard}
               onDecrement={handleDecrementCartItems}
               onConfirmOrder={handleResetOrder}
+              selectedTable={selectedTable}
             />
           )}
         </FooterContainer>
